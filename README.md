@@ -129,3 +129,121 @@ README.md
 $env:PGPASSWORD='MarksPass123'
 pg_dump -h 127.0.0.1 -U marks_user -d marks_db --schema-only -f db/schema.sql
 ```
+
+## Exact tested run steps (Windows)
+
+These are the exact commands verified on this machine.
+
+### What you’re doing
+
+You’re turning the API “on” so Postman/browser can use it.  
+Like starting an app, but this app also needs a database.
+
+### Step 0 — Make sure PostgreSQL is running
+
+1. Open Services on Windows (search “Services”).
+2. Find something like `postgresql-x64-16`.
+3. If it says Stopped, right-click → Start.
+
+### Step 1 — Create the database (only once on this PC)
+
+1. Open SQL Shell (psql).
+2. Keep pressing Enter until it asks for password.
+3. Type your postgres password (nothing will show) → Enter.
+4. When you see `postgres=#`, paste these one by one:
+
+```sql
+CREATE USER marks_user WITH PASSWORD 'MarksPass123';
+```
+
+```sql
+CREATE DATABASE marks_db OWNER marks_user;
+```
+
+```sql
+\q
+```
+
+If it says user/database already exists, that’s fine. Continue.
+
+### Step 2 — Open terminal in the API folder
+
+In VS Code / PowerShell, run:
+
+```powershell
+cd "c:\Users\Falcon\Downloads\FAST\Semester 9\Advanced Programming\Assignment 1\Code\src\MarksApi"
+```
+
+### Step 3 — Save the secret settings (only once on this PC)
+
+Copy-paste these 4 commands one by one:
+
+```powershell
+& "C:\Program Files\dotnet\dotnet.exe" user-secrets set "ConnectionStrings:Database" "Host=127.0.0.1;Port=5432;Database=marks_db;Username=marks_user;Password=MarksPass123"
+```
+
+```powershell
+& "C:\Program Files\dotnet\dotnet.exe" user-secrets set "Jwt:Key" "MarksApiDevSecretKey_ChangeMe_32chars_min_OK"
+```
+
+```powershell
+& "C:\Program Files\dotnet\dotnet.exe" user-secrets set "DemoUsers:TeacherPassword" "Teacher@123"
+```
+
+```powershell
+& "C:\Program Files\dotnet\dotnet.exe" user-secrets set "DemoUsers:StudentPassword" "Student@123"
+```
+
+This just tells the app: “use this database password and login password.”
+
+### Step 4 — Start the project
+
+Run:
+
+```powershell
+& "C:\Program Files\dotnet\dotnet.exe" run
+```
+
+Wait until you see something like:
+
+```text
+Now listening on: http://localhost:5041
+Application started.
+```
+
+Leave this window open. Don’t close it.
+
+### Step 5 — Check it works
+
+Open Chrome and go to:
+
+http://localhost:5041/health
+
+If it says Healthy, the project is running.
+
+Also open:
+
+http://localhost:5041/swagger
+
+### Step 6 — Test with Postman
+
+1. Keep the API running (Step 4 window still open).
+2. Open Postman.
+3. Select environment Local.
+4. Make sure baseUrl is `http://localhost:5041`.
+5. Run the Marks API collection.
+
+### How to stop
+
+Click the running terminal and press Ctrl + C.
+
+### Next time you want to run again
+
+You usually only need:
+
+```powershell
+cd "c:\Users\Falcon\Downloads\FAST\Semester 9\Advanced Programming\Assignment 1\Code\src\MarksApi"
+& "C:\Program Files\dotnet\dotnet.exe" run
+```
+
+Then open `/health` again.
